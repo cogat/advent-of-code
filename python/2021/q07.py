@@ -1,9 +1,6 @@
 import aocd
 
 
-COORD_REGEX = r"(\d+),(\d+) -> (\d+),(\d+)"
-
-
 def part_one(data):
     return min(sum([abs(d - i) for d in data]) for i in range(min(data), max(data)))
 
