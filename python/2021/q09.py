@@ -34,16 +34,16 @@ class Grid:
             return self.coord_at(r, c) < 9
         return False
 
-    def _map_basin(self, found_already: set, r, c) -> set:
+    def _map_basin(self, seen: set, r, c) -> set:
         if not self.inside(r, c):
-            return found_already
+            return seen
 
-        found_already.add((r, c))
+        seen.add((r, c))
         for pair in self.neighbours(r, c):
-            if pair not in found_already:
-                found_already = self._map_basin(found_already, *pair)
+            if pair not in seen:
+                seen = self._map_basin(seen, *pair)
 
-        return found_already
+        return seen
 
     def basin_size(self, r, c) -> int:
         basin_coords = self._map_basin(set(), r, c)
