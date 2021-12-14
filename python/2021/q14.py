@@ -1,7 +1,5 @@
 import aocd
 from collections import defaultdict
-import re
-from dataclasses import dataclass
 
 
 class Polymer:
