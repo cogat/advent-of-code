@@ -8,3 +8,5 @@ advent-of-code-data
 
 parse
 networkx
+astar
+bitstring
