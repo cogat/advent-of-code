@@ -1,5 +1,3 @@
-from collections import defaultdict
-from typing import Dict, Tuple
 import aocd
 from bitstring import BitArray
 from functools import reduce
