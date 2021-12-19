@@ -128,6 +128,56 @@ def create_scanners_from_input(input):
     return scanners
 
 
+def align_scanners(scanners):
+    assert any(
+        scanner.is_normalized for scanner in scanners
+    ), "At least one scanner must be normalized by default"
+
+    normalized_points = beacon_union([s for s in scanners if s.is_normalized])
+    normalized_megascanner = Scanner(id=-1, beacons=normalized_points)
+    normalized_megascanner.is_normalized = True
+    normalized_megascanner.origin = Beacon([0, 0, 0])
+
+    while any(not scanner.is_normalized for scanner in scanners):
+        for scanner in [s for s in scanners if not s.is_normalized]:
+            print(f"Align {scanner.id}")
+            possibly_aligned = scanner.try_to_align(normalized_megascanner)
+            if possibly_aligned:  # have a closer look
+                print("...aligned")
+                normalized_megascanner.beacons |= scanner.beacons
+
+
+def beacon_union(aligned_scanners):
+    united_beacons = set()
+    for scanner in aligned_scanners:
+        united_beacons |= scanner.beacons
+
+    return united_beacons
+
+
+def tasks(input):
+    scanners: t.List[Scanner] = create_scanners_from_input(input)
+    scanners[0].is_normalized = True
+    scanners[0].origin = Beacon([0, 0, 0])
+    align_scanners(scanners)
+    return len(beacon_union(scanners)), manhattan(scanners)
+
+
+def manhattan(scanners):
+    MM = 0
+    for i in range(len(scanners)):
+        b = scanners[i]
+        for j in range(i):
+            b2 = scanners[j]
+            mm = (
+                abs(b.origin.x - b2.origin.x)
+                + abs(b.origin.y - b2.origin.y)
+                + abs(b.origin.z - b2.origin.z)
+            )
+            MM = max(MM, mm)
+    return MM
+
+
 def test():
     s = Scanner(id=0, beacons={Beacon([1, 2, 3])})
     rots = list(s.reoriented_beacon_sets())
@@ -285,71 +335,6 @@ def test():
     part1, part2 = tasks(input)
     assert part1 == 79, part1
     assert part2 == 3621, part2
-
-
-def align_scanners(scanners):
-    assert any(
-        scanner.is_normalized for scanner in scanners
-    ), "At least one scanner must be normalized by default"
-
-    while any(not scanner.is_normalized for scanner in scanners):
-        for other_scanner in [s for s in scanners if s.is_normalized]:
-            for scanner in [s for s in scanners if not s.is_normalized]:
-                print(f"Align {scanner.id}, {other_scanner.id}")
-                aligned = scanner.try_to_align(other_scanner)
-                if aligned:
-                    print("...aligned")
-                    continue
-
-
-def align_scanners_2(scanners):
-    assert any(
-        scanner.is_normalized for scanner in scanners
-    ), "At least one scanner must be normalized by default"
-
-    normalized_points = beacon_union([s for s in scanners if s.is_normalized])
-    normalized_megascanner = Scanner(id=-1, beacons=normalized_points)
-    normalized_megascanner.is_normalized = True
-    normalized_megascanner.origin = Beacon([0, 0, 0])
-
-    while any(not scanner.is_normalized for scanner in scanners):
-        for scanner in [s for s in scanners if not s.is_normalized]:
-            print(f"Align {scanner.id}")
-            possibly_aligned = scanner.try_to_align(normalized_megascanner)
-            if possibly_aligned:  # have a closer look
-                print("...aligned")
-                normalized_megascanner.beacons |= scanner.beacons
-
-
-def beacon_union(aligned_scanners):
-    united_beacons = set()
-    for scanner in aligned_scanners:
-        united_beacons |= scanner.beacons
-
-    return united_beacons
-
-
-def tasks(input):
-    scanners: t.List[Scanner] = create_scanners_from_input(input)
-    scanners[0].is_normalized = True
-    scanners[0].origin = Beacon([0, 0, 0])
-    align_scanners_2(scanners)
-    return len(beacon_union(scanners)), manhattan(scanners)
-
-
-def manhattan(scanners):
-    MM = 0
-    for i in range(len(scanners)):
-        b = scanners[i]
-        for j in range(i):
-            b2 = scanners[j]
-            mm = (
-                abs(b.origin.x - b2.origin.x)
-                + abs(b.origin.y - b2.origin.y)
-                + abs(b.origin.z - b2.origin.z)
-            )
-            MM = max(MM, mm)
-    return MM
 
 
 if __name__ == "__main__":
